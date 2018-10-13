@@ -1,0 +1,39 @@
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Cellular Automa</title>
+<script type="text/javascript">
+'use strict';
+</script>
+<script type="text/javascript" src="utilities.js"></script>
+<script type="text/javascript" src="slider.js"></script>
+<script type="text/javascript" src="cookies.js"></script>
+<script type="text/javascript" src="tags.js"></script>
+<script type="text/javascript" src="linearRegression.js"></script>
+<script type="text/javascript" src="main.js"></script>
+<script type="text/javascript" src="parse.js"></script>
+
+<link rel="stylesheet" href="automa.css">
+</head>
+<body onload="main();" style="background-color:powderblue;">
+	<table>
+	<tr>
+	<td id="left">
+		<canvas id="view" width="700" height="600"></canvas>
+		<br>
+		<span id="rules"></span>
+		<canvas id="ruleset"></canvas>
+		<canvas id="counts"></canvas>
+		<canvas id="thumbnail"></canvas>
+		<br>
+		<button onclick="randomRule();">random</button>
+		<button onclick="previousCA();">previous</button>
+		<button onclick="createGroup();">new group</button>
+		<p id="log"></p>
+	</td>
+	<td id="sliders">
+	</td>
+	</tr>
+	</table>
+</body>
+</html>

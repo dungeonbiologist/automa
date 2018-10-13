@@ -1,0 +1,96 @@
+.slider{
+	position: relative;
+	width: 100%;
+}
+.target {
+	position: absolute;
+	width: 24px;
+	height: 24px;
+	background-color: #AAAAAA;
+	font-size: 18px;
+	white-space: nowrap;
+	overflow-x: hidden;
+	z-index: 2;
+}
+.value {
+	vertical-align: top;
+	position: absolute;
+	display:inline-block;
+	width: 16px;
+	height: 16px;
+	background-color: #DDDDDD;
+	margin: 0;
+	pointer-events:none;
+	font-size: 18px;
+	z-index: 1;
+}
+.tempvalue {
+	vertical-align: bottom;
+	position: absolute;
+	display:inline-block;
+	width: 10px;
+	height: 5px;
+	margin: 0;
+	pointer-events:none;
+	font-size: 18px;
+	z-index: 1;
+}
+.line {
+	width: 200px;
+	height: 0px;
+	margin: 0px;
+	border: 1px solid #000000;
+	pointer-events:none;
+}
+.code1 {
+	position: relative;
+	display:inline-block;
+	white-space: pre-wrap;
+	border: 2px solid blue;
+}
+.filler {
+	display: inline-block;
+	height: 25px;
+	width: 50px;
+}
+.clear {
+	vertical-align: top;
+	position: relative;
+	display:inline-block;
+	height: 12px;
+	width: 12px;
+	background-color: red;
+	display:inline-block;
+}
+.container {
+	vertical-align: top;
+	position: relative;
+	display: inline-block;
+	padding: 10px 0px;
+	background-color: #EEEEEE;
+}
+.reserved-word {
+	color: blue;
+}
+.code1 .ruleset {
+	visibility: hidden;
+	display:inline-block;
+}
+.code1:focus .ruleset{
+	visibility: visible;
+}
+canvas{
+	margin: 2px;
+	border: 2px solid white;
+	vertical-align: middle;
+}
+#rules{
+	display:inline-block;
+}
+#ruleset{
+	display:inline-block;
+}
+#sliders{
+	vertical-align: top;
+	width: 99%;
+}
