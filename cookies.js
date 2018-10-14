@@ -57,7 +57,7 @@ var docCookies = {
   },
   keys: function () {
     if(document.cookie == ""){
-    	return []; //without this test it would say that there is one empty string as a key;
+      return []; //without this test it would say that there is one empty string as a key;
     }
     var aKeys = document.cookie.replace(/((?:^|\s*;)[^\=]+)(?=;|$)|^\s*|\s*(?:\=[^;]*)?(?:\1|$)/g, "").split(/\s*(?:\=[^;]*)?;\s*/);
     for(var nLen = aKeys.length, nIdx = 0; nIdx < nLen; nIdx++) { aKeys[nIdx] = decodeURIComponent(aKeys[nIdx]); }
@@ -65,11 +65,11 @@ var docCookies = {
   }
 };
 function deleteCookie(){
-	var keys = docCookies.keys();
-	for(var i in keys){
-		docCookies.removeItem(keys[i]);
-	}
+  var keys = docCookies.keys();
+  for(var i in keys){
+    docCookies.removeItem(keys[i]);
+  }
 }
 function alertCookie(){
-	alert(document.cookie);
+  alert(document.cookie);
 }
