@@ -1,302 +1,28 @@
-function singleCombine(source){
-  this.circle = true;
-  if( ! source.checkCircle() ){
-    this.pattern = [source];
-  }
-  this.circle = false;
-}
-function AndCombiner(parent){
-  var child = {};
-  child.__proto__ = parent;
-  child.add = function(place){
-    for(var i=0; i<this.length; i++){
-      var p = this.transformPlace(i,place);
-      this.transform(i).add(p);
-    }
-  };
-  child.remove = function(place){
-    if(this.length==0){ return;}
-    var fit = [];
-    for(var i=0; i<this.length; i++){
-      var rule = this.transformRuleset(i,ruleset);
-      fit[i] = this.transform(i).actualValue(rule);
-    }
-    var best = firstBestAt(fit);
-    var p = this.transformPlace(best,place);
-    this.transform(best).remove(p);
-  };
-  child.actualValue = function(ruleset){
-    var fit = [];
-    for(var i=0; i<this.length; i++){
-      var rule = this.transformRuleset(i,ruleset);
-      fit[i] = this.transform(i).actualValue(rule);
-    }
-    return reduce(Math.min,fit);
-  };
-  return child;
-};
-function OrCombiner(parent) {
-  var child = {};
-  child.__proto__ = parent;
-  child.add = function(place){
-    if(this.length==0){ return;}
-    var fit = [];
-    for(var i=0; i<this.length; i++){
-      var rule = this.transformRuleset(i,ruleset);
-      fit[i] = this.transform(i).actualValue(rule);
-    }
-    var best = firstBestAt(fit);
-    var p = this.transformPlace(best,place);
-    this.transform(best).add(p);
-  };
-  child.remove = function(place){
-    for(var i=0; i<this.length; i++){
-      var p = this.transformPlace(i,place);
-      this.transform(i).remove(p);
-    }
-  };
-  child.actualValue = function(ruleset){
-    var fit = [];
-    for(var i=0; i<this.length; i++){
-      var rule = this.transformRuleset(i,ruleset);
-      fit[i] = this.transform(i).actualValue(rule);
-    }
-    return reduce(Math.max, fit);
-  };
-  return child
-};
-function AddCombiner(parent) {
-  var child = {};
-  child.__proto__ = parent;
-  child.add = function(place){
-    for(var i=0; i<this.length; i++){
-      var p = this.transformPlace(i,place);
-      this.transform(i).add(p);
-    }
-  };
-  child.remove = function(place){
-    for(var i=0; i<this.length; i++){
-      var p = this.transformPlace(i,place);
-      this.transform(i).remove(p);
-    }
-  };
-  child.actualValue = function(ruleset){
-    var fit = [];
-    for(var i=0; i<this.length; i++){
-      var rule = this.transformRuleset(i,ruleset);
-      fit[i] = this.transform(i).actualValue(rule);
-    }
-    return average(fit);
-  };
-  return child
-};
-var AndPrototype = {
-  kind: "And",
-  add: function(place){
-    for(var i=0; i<this.pattern.length; i++){
-      this.pattern[i].add(place);
-    }
-  },
-  remove: function(place){
-    if(this.pattern.length==0){ return;}
-    var fit = [];
-    for(var i=0; i<this.pattern.length; i++){
-      fit[i] = this.pattern[i].actualValue(ruleset);
-    }
-    var best = firstBestAt(fit);
-    this.pattern[best].remove(place);
-  },
-  actualValue: function(ruleset){
-    if(this.pattern.length==0){ return 0; }
-    var fit = [];
-    for(var i=0; i<this.pattern.length; i++){
-      fit[i] = this.pattern[i].actualValue(ruleset);
-    }
-    return reduce(Math.min,fit);
-  }
-};
-var OrPrototype = {
-  kind: "Or",
-  add: function(place){
-    if(this.pattern.length==0){ return;}
-    var fit = [];
-    for(var i=0; i<this.pattern.length; i++){
-      fit[i] = this.pattern[i].actualValue(ruleset);
-    }
-    var best = firstBestAt(fit);
-    this.pattern[best].add(place);
-  },
-  remove: function(place){
-    for(var i=0; i<this.pattern.length; i++){
-      this.pattern[i].remove(place);
-    }
-  },
-  actualValue: function(ruleset){
-    if(this.pattern.length==0){ return 0; }
-    var fit = [];
-    for(var i=0; i<this.pattern.length; i++){
-      fit[i] = this.pattern[i].actualValue(ruleset);
-    }
-    var  a = reduce(Math.max,fit);
-    /*if(this.min<1){
-      var q = 1-this.min;
-      a = (a-this.min)/q;
-    }*/
-    return a;
-  }
-};
-var NotPrototype = {
-  kind: "Not",
-  add: function(place){
-    if(this.pattern.length==0){ return;}
-    this.pattern[0].remove(place);
-  },
-  remove: function(place){
-    if(this.pattern.length==0){ return;}
-    this.pattern[0].add(place);
-  },
-  actualValue: function(ruleset){
-    if(this.pattern.length==0){ return 0; }
-    return 1 - this.pattern[0].actualValue(ruleset);
-  },
-  combine: singleCombine
-};
-var FlipMixin = {
-  length: 2,
-  transform: function(location){
-    return this.pattern[0];
-  },
-  transformRuleset: function(location, ruleset){
-    if(location == 0){
-      return ruleset;
-    } else {
-      return flip(ruleset);
-    }
-  },
-  transformPlace: function(location, place){
-    if(location == 0){
-      return place;
-    } else {
-      return states*bit(2,place) + states*states*bit(1,place);
-    }
-  },
-  combine: singleCombine
-};
-var PermuteMixin = {
-  length: factorial(4),
-  transform: function(location){
-    return this.pattern[0];
-  },
-  transformRuleset: function(location, ruleset){
-    return permute(ruleset)[location];
-  },
-  transformPlace: function(location, place){
-    var p = permutations[location];
-    return states*states*p[bit(2,place)] + states*p[bit(1,place)] + p[bit(0,place)];
-  },
-  combine: singleCombine
-};
-var BasePrototype = {
-  makeNew: function(source, pattern){
-    var result = {};
-    result.__proto__ = this;
-    result.clear(); //set variables
-    result.min = 0;
-    result.circle = false;
-    result.field = source;
-    result.source = [];
-     if(pattern){
-      for(var i=0; i<pattern.length; i++){
-        result.pattern[i] = pattern[i];;
-      }
-    }
-    return result;
-  },
-  add: function(place){
-    if(this.pattern.length==0){
-      this.pattern[0]=zeroArray(states*states*states);
-    }
-    this.pattern[0][states*place+ruleset[place]]=1;
-    var rule = ruleToTriad(place);
-    var space = document.createTextNode(" ");
-    var ruleNode = document.createElement("span");
-    ruleNode.className = "ruleset";
-    ruleNode.textContent = rule.toString();
-    var picture = illustrateRule( rule);
-    if(this.source.length == 0){
-      this.field.appendChild(space);
-    } else if(findRule(rule.toString(),this.source) == null){
-      var last = this.source[this.source.length-1];
-      this.field.insertBefore(space, last.nextSibling);
-    } else {
-      return;
-    }
-    this.field.insertBefore(picture, space);
-    this.field.insertBefore(ruleNode, space);
-    this.source.push(picture);
-    this.source.push(ruleNode);
-    this.source.push(space);
-  },
-  remove: function(place){
-    if(this.pattern.length==0){
-      this.pattern[0]=zeroArray(states*states*states);
-    }
-    this.pattern[0][states*place+ruleset[place]]=0;
-    var rule = [bit(0,place),bit(1,place),ruleset[place]];
-    var removeable = findRule(rule.toString(),this.source)
-    if(removeable != null){
-      removeable.parentNode.removeChild(removeable.previousSibling); //remove image
-      removeable.parentNode.removeChild(removeable);
-    }
-    this.source.splice(findAt(removeable, this.source) -1, 2); //remove things
-  },
-  actualValue: function(ruleset){
-    if(this.pattern.length==0){ return 0; }
-    return clamp(0, predict(ruleToPattern(ruleset), normPattern(this.pattern[0]) ), 1);
-  },
-  combine: function(source){/*do nothing*/},
-  checkCircle: function(){ return false; }
-};
-var SliderPrototype = {
-  add: function(place){
-    var fit = [];
-    for(var i=0; i<this.pattern.length; i++){
-      fit[i] = this.pattern[i].actualValue(ruleset);
-    }
-    var best = firstBestAt(fit);
-    this.pattern[best].add(place);
-  },
-  remove: function(place){
-    for(var i=0; i<this.pattern.length; i++){
-      this.pattern[i].remove(place);
-    }
-  },
-  actualValue: function(ruleset){
-    if(this.pattern.length==0){ return 0; }
-    var fit = [];
-    for(var i=0; i<this.pattern.length; i++){
-      fit[i] = this.pattern[i].actualValue(ruleset);
-    }
-    var  a = reduce(Math.max,fit);
-    /*if(this.min<1){
-      var q = 1-this.min;
-      a = (a-this.min)/q;
-    }*/
-    return a;
-  }
-};
 var sharedPrototype = {
   makeNew: function(source, pattern){
     var result = {};
     result.__proto__ = this;
     result.clear(); //set variables
     result.min = 0;
-    result.circle = false;
-    result.field = source;
     if(pattern.length == 0){
-      var rulesetModel = BasePrototype.makeNew(source,[]);
-      rulesetModel.source = [];
-      result.pattern.push(rulesetModel);
+	result.pattern = [
+	    0,0,0,1,
+	    0,0,0,1,
+	    0,0,0,1,
+	    0,1,0,0,
+	    0,0,0,1,
+	    0,0,0,1,
+	    0,0,0,1,
+	    0,0,1,0,
+	    0,0,0,1,
+	    0,0,0,1,
+	    0,0,0,1,
+	    0,0,1,0,
+	    0,0,0,1,
+	    0,0,0,1,
+	    0,0,0,1,
+	    1,0,0,0];
+	    
     }
     else if(pattern){
       for(var i=0; i<pattern.length; i++){
@@ -312,13 +38,6 @@ var sharedPrototype = {
       valueNode.textContent = actualValue.toFixed(1);
       valueNode.style.left = actualValue*200;
     }
-  },
-  combine: function(source){
-    this.circle = true;
-    if( ! source.checkCircle() ){
-      this.pattern.push(source);
-    }
-    this.circle = false;
   },
   clear: function(){
     this.pattern=[];
@@ -356,13 +75,6 @@ var sharedPrototype = {
       }
     }
   },
-  checkCircle: function(){
-    var circle = this.circle;
-    for(var i=0; i<this.pattern.length; i++){
-      circle = circle || this.pattern[i].checkCircle();
-    }
-    return circle;
-  },
   showChange: function(place){
     var rules = copyArray(ruleset);
     var currentFit = this.actualValue(ruleset);
@@ -389,42 +101,11 @@ var sharedPrototype = {
         this.node.removeChild(value);
       }
     }
+  },
+  actualValue: function(ruleset){
+      return predict(ruleToPattern(ruleset),this.pattern);
   }
 };
-var orFlipPrototype;
-var orPermutePrototype;
-var andFlipPrototype;
-var andPermutePrototype;
-var addFlipPrototype;
-var addPermutePrototype;
-(function(){
-  OrPrototype.__proto__ = sharedPrototype;
-  AndPrototype.__proto__ = sharedPrototype;
-  NotPrototype.__proto__ = sharedPrototype;
-  FlipMixin.__proto__ = sharedPrototype;
-  PermuteMixin.__proto__ = sharedPrototype;
-  BasePrototype.__proto__ = sharedPrototype;
-  SliderPrototype.__proto__ = sharedPrototype;
-  
-  orFlipPrototype = OrCombiner(FlipMixin);
-  orPermutePrototype = OrCombiner(PermuteMixin);
-  andFlipPrototype = AndCombiner(FlipMixin);
-  andPermutePrototype = AndCombiner(PermuteMixin);
-  addFlipPrototype = AddCombiner(FlipMixin);
-  addPermutePrototype = AddCombiner(PermuteMixin);
-})();
-
-/*
-Bug Log
-copied loop, didn't copy definition of data looped on
-typed worstFit instead of worstScore
-
-
-todo
-be able to add rule to an empty slider (all operators must create)
-make 'not' work properly
-autocomplete
-*/
 function createSlider(){
   var index = sliders.length;
   var slider = document.createElement("div");
@@ -458,12 +139,12 @@ function createSlider(){
     filler.className="filler";
     code.appendChild(filler);
     
-  code.addEventListener('input', parseScript, false);
+ // code.addEventListener('input', parseScript, false);
   clear.addEventListener('mousedown', deleteTarget, false);
   container.addEventListener('mousedown', addTarget, false);
   slider.addEventListener('mousedown', mouseDownSlider, false);
   
-  sliders[index] = SliderPrototype.makeNew(code, []);
+    sliders[index] = sharedPrototype.makeNew(code, []);
   sliders[index].node = slider;
 }
 function mouseDownSlider(e){

@@ -1,23 +1,9 @@
-
-function assert(t,msg) {
-  if (!t) {
-    alert(msg);
-  }
-  return t;
-}
 function zeroArray(length){
   var ar =[];
   for(var i=0; i<length; i++){
     ar[i]=0;
   }
   return ar;
-}
-function split(string, separator){
-  var result = string.split(separator);
-  if(result[0]==""){ //I made the mistake of having a leading comma.
-    result.shift();
-  }
-  return result;
 }
 function within(x,y,x2,y2,width,height){
   return x2<=x && x<=x2+width && y2<=y && y<=y2+height;
@@ -29,7 +15,7 @@ function truncateNumbers(nums){
   }
   return nums;
 }
-function permute(ruleset){
+function permuteRuleset(ruleset){
   var rulesets = [];
   for(var k=0; k<permutations.length; k++){
     rulesets[k]=[];
@@ -57,7 +43,7 @@ function permutePattern(pattern){
   }
   return patterns;
 }
-function flip(ruleset){
+function flipRuleset(ruleset){
   var flipped = [];
   for(var i=0; i<states; i++){
     for(var j=0; j<states; j++){
@@ -78,7 +64,7 @@ function flipPattern(pattern){
   return flipped;
 }
 function permuteRules(){
-  changeRule(randomElt(permute(ruleset)));
+  changeRule(randomElt(permuteRuleset(ruleset)));
   render();
 }
 function newRule(){
@@ -91,25 +77,6 @@ function newRule(){
 function randomRule(){
   changeRule(newRule());
   render();
-}
-function rulesetToInt(rule){
-  var integer = 0;
-  for(var i=states*states-1; i>=0; i--){
-    integer *= states;
-    integer += rule[i];
-  }
-  return integer;
-}
-function intToRuleset(int){
-  var rule = [];
-  for(var i=0; i<states*states; i++){
-    rule[i]=int%states;
-    int=Math.floor(int/states);
-    if(isNaN(rule[i])){
-      mistake=true;
-    }
-  }
-  return rule;
 }
 
 function fillout(row,rule,used,counts){
@@ -128,163 +95,6 @@ function fillout(row,rule,used,counts){
       counts[ used[i-1][j] ]++;
     }
   }
-  //possible = backfill(row,ruleset);
-}
-function invertRule(rule){
-  var result = [];
-  for(var i=0; i<states; i++){
-    result[i]=[];
-  }
-  for(var i=0; i<states; i++){
-    for(var j=0; j<states; j++){
-      result[ruleset[i*states+j]].push(states*states*ruleset[i*states+j] + states*i + j);
-    }
-  }
-  return result;
-}
-function backfill(row,rule){
-  //I tried the linear programming way but
-  var elur = invertRule(rule);
-  var hypothetical = [[]];
-  var possible = [[]];
-  for(var j=0;j<WIDTH;j++){
-    possible[0][j] = [row[0][j]];
-  }
-  for(var i=0; i<HEIGHT; i++){
-    possible[i+1] = [];
-    hypothetical[i]=[];
-    if(i>1){
-      //there are two kinds, of tiles: those who are consistant with ALL their children 
-      //and those that are only consistent with one of them. Partially consistant tiles
-      //should be parentless
-      for(var j=0;j<WIDTH;j++){
-        if(!validRule(
-          possible[i-1][ j],
-          possible[i-1][(j+1)%WIDTH],
-          possible[i-2][(j+1)%WIDTH],
-          rule)){
-          possible[i][j] = [];
-        }
-      }
-    }
-    for(var j=0;j<WIDTH;j++){
-      hypothetical[i][j]=[];
-      for(var k=0; k<possible[i][j].length; k++){
-        hypothetical[i][j] = hypothetical[i][j].concat(elur[possible[i][j][k]]);
-      }
-    }
-    for(var j=0;j<WIDTH;j++){
-      var newSet = ruleOverlap(hypothetical[i][j], hypothetical[i][(j+1)%WIDTH]);
-      possible[i+1][j] = rightStates(newSet);
-    }
-  }
-  return possible;
-}
-function fillin(possible,rule){
-  var row = [];
-  row[possible.length-1]=[];
-  for(var j=0;j<WIDTH;j++){
-    row[possible.length-1][j]= getState(possible[possible.length-1][j]);
-  }
-  for(var i=possible.length-1; i>0; i--){
-    row[i-1]=[];
-    for(var j=0;j<WIDTH;j++){
-      var right = row[i][j];
-      var left = row[i][(j-1+WIDTH)%WIDTH];
-      if(right==states || left==states){ //fill as normal exept in blank spots
-        row[i-1][j] = getState(possible[i-1][j]);
-      } else {
-        row[i-1][j]=rule[ states*left+right ];
-      }
-    }
-  }
-  return row;
-}
-function getState(possible){
-  if(possible.length===0){
-    return states;
-  } else {
-    return possible[0];
-  }
-}
-function rightStates(rules){
-  var places = zeroArray(states);
-  for(var i=0; i<rules.length; i++){ //record which states could be to the left of the right rules
-    places[bit(0,rules[i])]=1;
-  }
-  return bitToSet(places);
-}
-function ruleOverlap(left,right){
-  var places = zeroArray(states);
-  for(var i=0; i<right.length; i++){ //record which states could be to the left of the right rules
-    places[ bit(1, right[i]) ] = 1;
-  }
-  var result = [];
-  for(var i=0; i<left.length; i++){ //and keep the rules that could be to the left of those states
-    if(places[bit(0, left[i])] == 1){
-      result.push(left[i]);
-    }
-  }
-  return result;
-}
-function bit(n,num){
-  return Math.floor(num / Math.pow(states,n))%states;
-}
-function validRule(left,right,bottom,ruleset){
-  //it should be able to produce each of the possible bottom tiles
-  //if it cannot then it is not valid
-  for(var k=0; k<bottom.length; k++){
-    var valid = false
-    for(var i=0; i<left.length;   i++){ 
-      for(var j=0; j<right.length;  j++){
-        if(ruleset[states*left[i]+right[j]]===bottom[k]){
-          valid=true;
-        }
-      }
-    }
-    if(!valid){ return false; }
-  }
-  return true;
-}
-function ruleOverlap3(left,right,bottom){
-  var places = zeroArray(states*states*states);
-  for(var i=0; i<left.length; i++){ //and keep the rules that could be to the left of those states
-    for(var j=0; j<right.length; j++){
-      for(var k=0; k<bottom.length; k++){
-        if(bit(0, left[i]) === bit(1, right[j])
-        && bit(2,  left[i]) === bit(1, bottom[k]) 
-        && bit(2, right[j]) === bit(0, bottom[k])){
-          places[left[i]]=1;
-        }
-      }
-    }
-  }
-  return bitToSet(places);
-}
-function bitToSet(bits){
-  var result = [];
-  for(var i=0; i<bits.length; i++){
-    if(bits[i]==1){
-      result.push(i);
-    }
-  }
-  return result;
-}
-
-function union(a,b){
-  return a.concat(b);
-}
-function negate(a){
-  var result = [];
-  for(var i=0; i<a.length; i++){
-    if(typeof a[i] == "number"){
-      result[i] = 1-a[i];
-    }else {
-      result[i] = negate(a[i]);
-    }
-  }
-  result.fn = a.fn //actually wrong max should swap with min
-  return result;
 }
 
 function reducemap(fn, list){
@@ -299,13 +109,16 @@ function reducemap(fn, list){
   }
   return results;
 }
+function bit(n,num){
+  return Math.floor(num / Math.pow(states,n))%states;
+}
 function reducemapmin(list){
   if(list.length ==0){
     return new Error("reducemapmin can't take an empty list");
   }
   var results = copyArray(list[0]);
   for(var i=0; i<list.length; i++){
-    for(var j=1; i<list[i].length; i++){
+    for(var j=1; j<list[i].length; j++){
       results[j] = Math.min(results[j],list[i][j]);
     }
   }
@@ -477,12 +290,6 @@ function normalizePattern(pattern){
     pattern[i]*=d;
   }
   return pattern;
-}
-function normalizeOr(patterns){
-  
-  
-  
-  
 }
 function normPattern(pattern){
   var sum=0;
@@ -701,18 +508,3 @@ function patternToRule(pattern, ruleset){
   }
   return rule;
 }
-//compute the gradients. each point has a closest neighbor, 
-//we can use the difference in values and difference in location 
-//as the slope and direction of the gradient at this point
-//we can probably linearly inturpolate between gradients
-//points that are too distant have no relation
-
-//if there is a chunk that many patterns share and our target matches it but  one tile smaller
-//we can use good turing or possibly laplace to estimate the probability of this smaller shared section
-//top plut one bottom plus one
-
-/*
-Buglog:
-I had cost as the sum over a loop but forgot that I had multiple things to loop over so cost ended as the sum of all of them
-and I copied the initial data into a variable of the same name so I didn't notice when I wanted to use the initial value later on
-*/

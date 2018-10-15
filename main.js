@@ -568,7 +568,6 @@ function main () {
   render();
 }
 function init(){
-  tags=docCookies.keys();
   row[0]=[];
   for(var i=0; i<WIDTH; i++){
     row[0][i]= Math.floor(Math.random()*states);
@@ -582,7 +581,6 @@ function init(){
 function changeRule(rule,old){
   if(!equal(ruleset,rule)){
     CAhistory.push(rule);
-    saveAndClearTags();
     ruleset = rule;
     fillout(row,ruleset,ruleUsed,countRulesUsed);
     for(var i=0; i<states*states; i++){
