@@ -1,28 +1,12 @@
 var sharedPrototype = {
-  makeNew: function(source, pattern){
+  makeNew: function(index, pattern){
     var result = {};
     result.__proto__ = this;
     result.clear(); //set variables
     result.min = 0;
+    result.dataIndex=index;
     if(pattern.length == 0){
-	result.pattern = [
-	    0,0,0,1,
-	    0,0,0,1,
-	    0,0,0,1,
-	    0,1,0,0,
-	    0,0,0,1,
-	    0,0,0,1,
-	    0,0,0,1,
-	    0,0,1,0,
-	    0,0,0,1,
-	    0,0,0,1,
-	    0,0,0,1,
-	    0,0,1,0,
-	    0,0,0,1,
-	    0,0,0,1,
-	    0,0,0,1,
-	    1,0,0,0];
-	    
+	result.pattern = zeroArray(states*states*states);	    
     }
     else if(pattern){
       for(var i=0; i<pattern.length; i++){
@@ -76,7 +60,7 @@ var sharedPrototype = {
     }
   },
   showChange: function(place){
-    var rules = copyArray(ruleset);
+    var rules = copyVect(ruleset);
     var currentFit = this.actualValue(ruleset);
     if(findChild(this.node, "tempvalue") == null){
       for(var i=0; i<states; i++){
@@ -130,21 +114,28 @@ function createSlider(){
     clear.className="clear";
     slider.appendChild(clear);
     
-    var code = document.createElement("div");
-    code.setAttribute("contentEditable",true);
-    code.className="code1";
-    slider.appendChild(code);
-    
-    var filler = document.createElement("div");
-    filler.className="filler";
-    code.appendChild(filler);
-    
- // code.addEventListener('input', parseScript, false);
   clear.addEventListener('mousedown', deleteTarget, false);
   container.addEventListener('mousedown', addTarget, false);
   slider.addEventListener('mousedown', mouseDownSlider, false);
   
-    sliders[index] = sharedPrototype.makeNew(code, []);
+  var box = document.createElement("span");
+  box.style.display = "inline-block";
+  box.style.padding ="20px 10px 0px";
+  box.style.valign="middle";
+  box.style.border = "solid";
+  box.addEventListener('mouseup', mouseUpGroup, false);
+  var button = document.createElement("canvas");
+  button.width =50;
+  button.height =50;
+  button.addEventListener('click', hideGroup, false);
+  button.addEventListener('dblclick', dblclickGroup, false);
+  button['data-index']=storedGroups.length;
+  box['data-index']=storedGroups.length;
+  storedGroups.push({box:box, thumbnail:button, pattern:[]});
+  slider.appendChild(button);
+  slider.appendChild(box);
+  
+  sliders[index] = sharedPrototype.makeNew(storedGroups.length-1, []);
   sliders[index].node = slider;
 }
 function mouseDownSlider(e){

@@ -1,14 +1,4 @@
 //The external interface is guessToRule, predict, goodness
-function ruleToPattern(rule){
-  var point = [];
-  for(var i=0; i<rule.length; i++){
-    for(var j=0; j<states; j++){
-      point[i*states+j]=0;
-    }
-    point[i*states+rule[i]]=1;
-  }
-  return point;
-}
 function predict(point,model){
   var result = 0;
   for(var i=0; i<point.length; i++){
@@ -17,7 +7,7 @@ function predict(point,model){
   return result;
 }
 function guessToRule(ruleset,expr){
-  var rule = copyArray(ruleset);
+  var rule = copyVect(ruleset);
   var scores = leastChange(ruleset);
   var err = sumError(ruleset);
   var thiserr = errorOf(expr,ruleset);
@@ -57,6 +47,14 @@ function leastChange(ruleset){
   var change = reduce(add,changes);
   return change;
 }
+
+function add(a,b){
+  var result = [];
+  for(var i=0; i<a.length && i<b.length; i++){
+    result[i] = a[i]+b[i];
+  }
+  return result;
+}
 function goodness(expr,rule,target){
   var grad = possibleScores(expr,rule);
   for(var j=0; j<grad.length; j++){
@@ -67,7 +65,7 @@ function goodness(expr,rule,target){
 function possibleScores(expr,rule){
   var grad = [];
   for(var i=0; i<states*states; i++){
-    var testRule = copyArray(rule);
+    var testRule = copyVect(rule);
     for(var j=0; j<states; j++){
       testRule[i]=j;
       grad[i*states + j] = expr.actualValue(testRule);
