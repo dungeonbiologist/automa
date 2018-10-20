@@ -1,4 +1,3 @@
-
 function mouseMoveRuleset(e){
   var m = mouseOf(e.currentTarget, e);
   //moused over ruleset
@@ -32,13 +31,9 @@ function mouseDownRuleset(e){
   var m = mouseOf(e.currentTarget, e);
    //over ruleset
   var place = states*Math.floor(m.x/size) + Math.floor(m.y/size);
-  if(e.shiftKey){
-    sliders[sliders.active].add(place);
-  } else {
-    var copy = copyVect(ruleset);
+  var copy = copyVect(ruleset);
     copy[place] = (ruleset[place]+1)%states;
     changeRule(copy);
-  }
   render();
 }
 

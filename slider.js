@@ -1,18 +1,10 @@
 var sharedPrototype = {
-  makeNew: function(index, pattern){
+    makeNew: function(){
     var result = {};
     result.__proto__ = this;
     result.clear(); //set variables
     result.min = 0;
-    result.dataIndex=index;
-    if(pattern.length == 0){
-	result.pattern = zeroArray(states*states*states);	    
-    }
-    else if(pattern){
-      for(var i=0; i<pattern.length; i++){
-        result.pattern[i] = pattern[i];;
-      }
-    }
+    result.pattern = zeroArray(states*states*states);
     return result;
   },
   update: function(){
@@ -45,7 +37,7 @@ var sharedPrototype = {
   },
   changeValue: function(target){
     if(this.pattern.length>0) {
-      this.desiredVal = target
+    this.desiredVal = target;
       var oldRuleset = ruleset;
       for(var i=0; i<9; i++){
         var newRuleset = guessToRule(oldRuleset,this);
@@ -91,15 +83,13 @@ var sharedPrototype = {
   }
 };
 function createSlider(){
-  var index = sliders.length;
   var slider = document.createElement("div");
   slider.className="slider";
-  slider["data-index"]=index;
   document.getElementById("sliders").appendChild(slider);
     var container = document.createElement("span");
     container.className="container";
-    container.addEventListener('mouseover', mouseOverSlider, false);
-    container.addEventListener('mouseout', mouseOutSlider, false);
+    container.addEventListener("mouseover", mouseOverSlider, false);
+    container.addEventListener("mouseout", mouseOutSlider, false);
     slider.appendChild(container);
       var line = document.createElement("div");
       line.className="line";
@@ -114,45 +104,57 @@ function createSlider(){
     clear.className="clear";
     slider.appendChild(clear);
     
-  clear.addEventListener('mousedown', deleteTarget, false);
-  container.addEventListener('mousedown', addTarget, false);
-  slider.addEventListener('mousedown', mouseDownSlider, false);
+  clear.addEventListener("mousedown", deleteTarget, false);
+  container.addEventListener("mousedown", addTarget, false);
+  slider.addEventListener("mousedown", mouseDownSlider, false);
   
   var box = document.createElement("span");
   box.style.display = "inline-block";
   box.style.padding ="20px 10px 0px";
   box.style.valign="middle";
   box.style.border = "solid";
-  box.addEventListener('mouseup', mouseUpGroup, false);
-  var button = document.createElement("canvas");
-  button.width =50;
-  button.height =50;
-  button.addEventListener('click', hideGroup, false);
-  button.addEventListener('dblclick', dblclickGroup, false);
-  button['data-index']=storedGroups.length;
-  box['data-index']=storedGroups.length;
-  storedGroups.push({box:box, thumbnail:button, pattern:[]});
-  slider.appendChild(button);
+    box.addEventListener("mouseup", mouseUpSliderGroup, false);
   slider.appendChild(box);
   
-  sliders[index] = sharedPrototype.makeNew(storedGroups.length-1, []);
-  sliders[index].node = slider;
+  var data = sharedPrototype.makeNew();
+    data.node = slider;
+    slider.slider = data;
+    data.box = box;
+    box.slider = data;
+    sliders.push(data);
 }
 function mouseDownSlider(e){
-  sliders[sliders.active].node.style.border = "none";
-  sliders.active = this["data-index"];
+  sliders.active.node.style.border = "none";
+  sliders.active = this.slider;
   this.style.border = "2px solid black";
+}
+function mouseUpSliderGroup(e){
+  var box = e.target;
+    if(grabbedCA !== null){
+      box.appendChild(grabbedCA);
+      grabbedCA.group = box;
+      //collect patterns
+      var list = [];
+      for(var t=0; t< box.childNodes.length; t++){
+	  var item = box.childNodes[t];
+	  var thumb = item.CA;
+	  list.push(thumb.pattern);
+      }
+	//hack; really I want the list of them
+      box.slider.pattern = grabbedCA.CA.pattern;
+      grabbedCA = null;
+  }
 }
 function deleteTarget(e){
   var node = findChild(e.target.parentNode,"target");
   if(node){
-    sliders[node.parentNode["data-index"]].actualVal=undefined; //delete the target
+    node.parentNode.slider.actualVal=undefined; //delete the target
     node.parentNode.removeChild(node);
   }
 }
 function addTarget(e){
-  sliders[sliders.active].node.style.border = "none";
-  sliders.active=e.target.parentElement["data-index"];
+  sliders.active.node.style.border = "none";
+  sliders.active=e.target.parentElement.slider;
   e.target.parentElement.style.border = "2px solid black";
   var already = findChild(e.target.parentNode,"target");
   if(!already){
@@ -161,10 +163,10 @@ function addTarget(e){
     node.className="target grabable";
     node.textContent="0";
     e.target.parentNode.insertBefore(node, e.target); //appendChild would put this element lower down instead of on the same line
-    node.addEventListener('mousedown', grabNode, false);
-    node.addEventListener('keyup', adjustPosition, false);
+    node.addEventListener("mousedown", grabNode, false);
+    node.addEventListener("keyup", adjustPosition, false);
     differential = -getPosition(e.target.parentNode).x;
-    node.style.left = mouse.x+differential + "px"
+    node.style.left = mouse.x+differential + "px";
     grabbed = node;
     mouseMove(e);
   }
@@ -185,11 +187,11 @@ function findChild(node,id){
   return null;
 }
 function adjustPosition(e){
-  e.target.textContent = e.target.textContent.replace(/[^0-9.]/g,'')
+  e.target.textContent = e.target.textContent.replace(/[^0-9.]/g,"");
   var value = clamp(0, parseFloat(e.target.textContent) || 0, 1);
   e.target.style.left= clamp(0, value*200, 200) + "px";
-  var place = e.target.parentNode["data-index"];
-  sliders[place].changeValue(value);
+  var slider = e.target.parentNode.slider;
+  slider.changeValue(value);
   render();
 }
 function getPosition(el){

@@ -21,8 +21,8 @@ const WIDTH=50;
 const HEIGHT=50;
 const size=10;
 const states=4;
-const colors=["#FF4444","#44FF44","#4444FF","#FFFF44"];
-const lightColors=["#AA0000","#009900","#0000CC","#AA9900"];
+const colors=["#FF4444","#44EE44","#6688FF","#FFFF44"];
+const lightColors=["#BB0000","#00AA00","#0000DD","#BBBB00"];
 const textSize=17;
 const permutations = allPermutations(states);
 //variables
@@ -34,9 +34,7 @@ var ruleUsed=[];//for each cell what rule was used to get it
 var countRulesUsed=[]; //how many times each rule was used
 var alternateRow = undefined; //shows what would happen if you changed this square
 var sliders = [];
-var CAhistory = []; //keeps a record of what CAs you've seen
-var storedCAs = [];
-var storedGroups = [];
+var CAhistory = []; //keeps a record of what CAs you"ve seen
 var mouse = {x:0,y:0};
 var showRule;//shows what would happen if you changed this rule
 var indicateRule;
@@ -50,7 +48,7 @@ function drawCounts(context,counts){
   var max = WIDTH*HEIGHT;
   for(var i=0; i<states*states; i++){
     var value = 256-Math.floor(256*counts[i]/max);
-    context.fillStyle = 'rgb('+value+','+value+','+value+')';
+    context.fillStyle = "rgb("+value+","+value+","+value+")";
     context.fillRect(Math.floor(i/states)*size,i%states*size,size,size);
   }
 }
@@ -68,8 +66,8 @@ function drawPattern(context,pattern){
   context.globalAlpha = "1";
 }
 function render() {
-  var canvas = document.getElementById('view');
-  var context = canvas.getContext('2d');
+  var canvas = document.getElementById("view");
+  var context = canvas.getContext("2d");
 //  context.clearRect(0,0,canvas.width,canvas.height);
   context.clearRect(0,0,size*(WIDTH+1), size*HEIGHT);
   context.strokeStyle = "#000000";
@@ -87,42 +85,20 @@ function render() {
     }
   }
   drawRules(ruleset);
-  var context2 = document.getElementById('ruleset').getContext('2d');
+  var context2 = document.getElementById("ruleset").getContext("2d");
   drawRuleset(context2, ruleset);
   if(showRule !== undefined){
     context2.fillStyle = lightColors[ruleset[showRule]];
     context2.fillRect(bit(1,showRule)*size, bit(0,showRule)*size,size,size);
   }
-  var context3 = document.getElementById('counts').getContext('2d');
+  var context3 = document.getElementById("counts").getContext("2d");
   if(countRulesUsed.length >0){
     drawCounts(context3, countRulesUsed);
   }
   for(var i=0; i<sliders.length; i++){
     sliders[i].update();
   }
-  outlineRules(sliders[sliders.active].gradient());
-}
-function getPosition(el){
-  var xPos = 0;
-  var yPos = 0;
-  while (el) {
-    if (el.tagName == "BODY") {
-      // deal with browser quirks with body/window/document and page scroll
-      var xScroll = el.scrollLeft || document.documentElement.scrollLeft;
-      var yScroll = el.scrollTop || document.documentElement.scrollTop;
-      xPos += (el.offsetLeft - xScroll + el.clientLeft);
-      yPos += (el.offsetTop - yScroll + el.clientTop);
-    } else {
-      // for all other non-BODY elements
-      xPos += (el.offsetLeft - el.scrollLeft + el.clientLeft);
-      yPos += (el.offsetTop - el.scrollTop + el.clientTop);
-    }
-    el = el.offsetParent;
-  }
-  return {
-    x: xPos,
-    y: yPos
-  };
+  outlineRules(sliders.active.gradient());
 }
 function mouseOf(object,e){
   var m = {};
@@ -139,7 +115,7 @@ function mouseOf(object,e){
   return m;
 }
 function mouseMove(e) {
-  mouse = mouseOf(document.getElementById('view'), e);
+  mouse = mouseOf(document.getElementById("view"), e);
   var change = false;
   if(differential !== false && grabbed){
     var x = grabbed;
@@ -147,7 +123,7 @@ function mouseMove(e) {
     var str = value + "px";
     x.textContent = value/200;
     x.style.left = str;
-    var data = sliders[x.parentNode["data-index"]];
+    var data = x.parentNode.slider;
     if(data.desiredVal !== value/200){
       change=true;
     }
@@ -160,7 +136,7 @@ function mouseMove(e) {
     var x = Math.floor(mouse.x/size);
     alternateRow[0][x] = (row[0][x]+1)%states;
     fillout(alternateRow,ruleset,[],[]);
-    showRule=undefined; //if you're over the first row don't show any rule
+    showRule=undefined; //if you"re over the first row don"t show any rule
     change=true;
   } else if(alternateRow !== undefined){
     alternateRow=undefined;
@@ -181,7 +157,7 @@ function mouseMove(e) {
 }
 function mouseOverSlider(e){
   //moused over slider
-  //var slider = sliders[e.target.parentElement["data-index"]];
+  //var slider = e.target.parentElement.slider;
   //var g = slider.gradient();
   //outlineRules(g);
 }
@@ -211,11 +187,11 @@ function changeRule(rule,old){
     for(var i=0; i<states*states; i++){
       canvases[i].stale = true;
     }
-    fillBody(canvases[states*states].getContext('2d'),row);
+    fillBody(canvases[states*states].getContext("2d"),row);
     slidersChanged=true;
     if(!old){
       drawThumbnail(
-        document.getElementById('thumbnail').getContext('2d'),
+        document.getElementById("thumbnail").getContext("2d"),
         canvases[states*states],
         rule
       );
@@ -231,39 +207,39 @@ function main (){
     document.captureEvents(Event.MOUSEUP);
     document.captureEvents(Event.INPUT);
   }
-  window.addEventListener('mousedown', mouseDown, false);
-  window.addEventListener('mousemove', mouseMove, false);
-  window.addEventListener('mouseup', mouseUp, false);
-  var ruleNode = document.getElementById('ruleset');
-    ruleNode.addEventListener('mousemove', mouseMoveRuleset, false);
-    ruleNode.addEventListener('mouseout', mouseOutRuleset, false);
-    ruleNode.addEventListener('mousedown', mouseDownRuleset, false);
+  window.addEventListener("mousedown", mouseDown, false);
+  window.addEventListener("mousemove", mouseMove, false);
+  window.addEventListener("mouseup", mouseUp, false);
+  var ruleNode = document.getElementById("ruleset");
+    ruleNode.addEventListener("mousemove", mouseMoveRuleset, false);
+    ruleNode.addEventListener("mouseout", mouseOutRuleset, false);
+    ruleNode.addEventListener("mousedown", mouseDownRuleset, false);
   var rules = document.getElementById("rules");
   for(var j=0; j<states; j++){
     var line = document.createElement("div");
     rules.appendChild(line);
     for(var i=0; i<states; i++){
       var rule = illustrateRule([i,j,0]);
-      rule.addEventListener('mousedown', mouseDownTriadRule, false);
+      rule.addEventListener("mousedown", mouseDownTriadRule, false);
       line.appendChild(rule);
     }
   }
-  var canvas = document.getElementById('view');
-    canvas.addEventListener('mouseout', mouseOutRuleset, false);
+  var canvas = document.getElementById("view");
+    canvas.addEventListener("mouseout", mouseOutRuleset, false);
     canvas.width  = (WIDTH+1)*size;
     canvas.height = HEIGHT*size;
-  canvas = document.getElementById('ruleset');
+  canvas = document.getElementById("ruleset");
     canvas.width  = states*size;
     canvas.height = states*size;
-  canvas = document.getElementById('counts');
+  canvas = document.getElementById("counts");
     canvas.width  = states*size;
     canvas.height = states*size;
-  canvas = document.getElementById('thumbnail');
+  canvas = document.getElementById("thumbnail");
     canvas.width  = 50;
     canvas.height = 50;
-    canvas.addEventListener('mousedown', mouseDownOriginalThumbnail, false);
+    canvas.addEventListener("mousedown", mouseDownOriginalThumbnail, false);
   for(var i=0; i<states*states+1; i++){
-    canvases[i] = document.createElement('canvas');
+    canvases[i] = document.createElement("canvas");
     canvases[i].width  = size*(WIDTH+1);
     canvases[i].height = size*HEIGHT;
   }
@@ -276,8 +252,8 @@ function init(){
     row[0][i]= Math.floor(Math.random()*states);
   }
   changeRule(newRule());
-  for(var i=0; i<5; i++){
+  for(var i=0; i<1; i++){
     createSlider(i);
   }
-  sliders.active=0;
+  sliders.active=sliders[0];
 }

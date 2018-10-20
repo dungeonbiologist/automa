@@ -1,5 +1,5 @@
 function drawTriad(canvas, triad, highlight){
-  var context = canvas.getContext('2d');
+  var context = canvas.getContext("2d");
   context.fillStyle = colors[triad[0]];
   context.fillRect(0,0,size,size);
   context.fillStyle = colors[triad[1]];
@@ -11,12 +11,12 @@ function drawTriad(canvas, triad, highlight){
   canvas["data-bottom"]=triad[2];
 }
 function illustrateRule(rule){
-  var image = document.createElement('canvas');
+  var image = document.createElement("canvas");
   image.width  = size*2;
   image.height = size*2;
-  image.addEventListener('mousemove', mouseMoveTriad, false);
-  image.addEventListener('mousedown', mouseDownTriad, false);
-  image.addEventListener('mouseout', mouseOutRuleset, false);
+  image.addEventListener("mousemove", mouseMoveTriad, false);
+  image.addEventListener("mousedown", mouseDownTriad, false);
+  image.addEventListener("mouseout", mouseOutRuleset, false);
   drawTriad(image, rule);
   return image;
 }
@@ -76,13 +76,9 @@ function mouseDownTriadRule(e){
    //over triad
   var triad = e.target;
   var place = states*triad["data-left"] + triad["data-right"];
-  if(e.shiftKey){
-    sliders[sliders.active].add(place);
-  } else {
-    var copy = copyVect(ruleset);
-    copy[place] = (ruleset[place]+1)%states;
-    changeRule(copy);
-  }
+  var copy = copyVect(ruleset);
+  copy[place] = (ruleset[place]+1)%states;
+  changeRule(copy);
   render();
 }
 function mouseDownTriad(e){

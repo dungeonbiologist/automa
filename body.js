@@ -30,7 +30,7 @@ function detailBody(context, showRule){
 function drawBody(context, showRule){
   var place = (showRule==undefined)?states*states: showRule;
   if(canvases[place].stale){
-    var context2 = canvases[place].getContext('2d');
+    var context2 = canvases[place].getContext("2d");
     context2.drawImage(canvases[states*states], 0, 0); //draw the default
     detailBody(context2, showRule); //and add the details
     canvases[place].stale = false;
@@ -64,16 +64,14 @@ function mouseDown(e){
     for(var i=0; i<states*states; i++){
       canvases[i].stale = true;
     }
-    fillBody(canvases[states*states].getContext('2d'),row);
+      fillBody(canvases[states*states].getContext("2d"),row);
+      mouseMove(e); //fill out alternateRow
     render();
   } else if(between(mouse.x/size,0,WIDTH) && between(mouse.y/size,1,HEIGHT-1)){
     //over field
     var c = mouseToGrid(mouse.x,mouse.y);
-    var place = ruleUsed[c.i][c.j];
-    if(e.shiftKey){
-        sliders[sliders.active].add(place);
-    }
-    render();
+      var place = ruleUsed[c.i][c.j];
+      render();
   }
 }
 function mouseUp (e){

@@ -1,7 +1,7 @@
 //The external interface is guessToRule, predict, goodness
 function predict(point,model){
   var result = 0;
-  for(var i=0; i<point.length; i++){
+  for(var i=0; i<point.length && i<model.length; i++){
     result+=point[i]*model[i];
   }
   return result;

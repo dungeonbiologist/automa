@@ -39,7 +39,7 @@ function truncateNumbers(nums){
 
 function reducemap(fn, list){
   if(list.length ==0){
-    return new Error("reducemapmax can't take an empty list");
+      return new Error("reducemapmax cant take an empty list");
   }
   var results = copyArray(list[0]);
   for(var i=1; i<list.length; i++){
@@ -51,7 +51,7 @@ function reducemap(fn, list){
 }
 function reducemapmin(list){
   if(list.length ==0){
-    return new Error("reducemapmin can't take an empty list");
+    return new Error("reducemapmin cant take an empty list");
   }
   var results = copyArray(list[0]);
   for(var i=0; i<list.length; i++){
@@ -66,7 +66,7 @@ function mostScore(points,fn){
     return 0;
   }
   var oldpoints = points;
-  var points = map(points,copyArray); //don't clobber points
+  var points = map(points,copyArray); //don"t clobber points
   var chosen = [];
   var costs = zeroArray(points.length);
   for(var k=0; k<states*states; k++){
@@ -75,7 +75,7 @@ function mostScore(points,fn){
     var place=0;
     var best = Infinity;
     for(var i=0; i<sum.length; i++){
-      if(contains(chosen, Math.floor(i/states))){ //skip if you've already looked at it
+      if(contains(chosen, Math.floor(i/states))){ //skip if you"ve already looked at it
         i+=states-1;
         continue;
       }
@@ -96,8 +96,8 @@ function mostScore(points,fn){
   var cost = costs.sort(fn).pop();
   return cost;
 }
-worstScore = function(points){ return mostScore(points,function(a,b){return a > b}); };
-bestScore  = function(points){ return mostScore(points,function(a,b){return a < b}); };
+worstScore = function(points){ return mostScore(points,function(a,b){return a > b;}); };
+bestScore  = function(points){ return mostScore(points,function(a,b){return a < b;}); };
 
 function filter(thing,things,mask){
   var result = [];
@@ -187,7 +187,7 @@ function normMaxPattern(pattern){
       max = Math.max(max,pattern[i*states+j]);
     }
   }
-  sum=max || 1;
+  var sum=max || 1;
   var result = [];
   for(var i=0; i<states*states*states; i++){
     result[i]=pattern[i]/sum;
@@ -302,16 +302,6 @@ function findAt(thing, list){
 function insertAfter(el, referenceNode) {
   referenceNode.parentNode.insertBefore(el, referenceNode.nextSibling);
 }
-function countsToVector(counts,ruleset){
-  var vect = [];
-  for (var i =0; i<states*states; i++){
-    for(var j=0; j<states; j++){
-      vect[i*states+j]=0;
-    }
-    vect[i*states+ruleset[i]]=counts[i];
-  }
-  return vect;
-}
 function mult(a,list){
   for(var i=0; i<list.length; i++){
     list[i]=a*list[i];
@@ -319,8 +309,11 @@ function mult(a,list){
   return list;
 }
 function log(message){
-  document.getElementById ("log").innerHTML += message + '<br>';
+  document.getElementById ("log").innerHTML += message + "<br>";
+}
+function liveLog(message){
+    document.getElementById ("log").innerHTML = message + "<br>";
 }
 function clearLog(){
-  document.getElementById ("log").innerHTML = '';
+  document.getElementById ("log").innerHTML = "";
 }
