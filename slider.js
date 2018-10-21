@@ -2,9 +2,9 @@ var sharedPrototype = {
     makeNew: function(){
     var result = {};
     result.__proto__ = this;
-    result.clear(); //set variables
-    result.min = 0;
-    result.pattern = zeroArray(states*states*states);
+    result.patterns = [];
+    result.desiredVal = undefined;
+    result.offset=false;
     return result;
   },
   update: function(){
@@ -15,42 +15,42 @@ var sharedPrototype = {
       valueNode.style.left = actualValue*200;
     }
   },
-  clear: function(){
-    this.pattern=[];
-    this.desiredVal = undefined;
-    this.offset=false;
-    this.examples = [];
-  },
   value: function(){
     return this.desiredVal || 0;
   },
   gradient: function(){
-    if(this.pattern.length == 0){
+    if(this.patterns.length == 0){
       return zeroArray(states*states*states);
     }
-    var currentFit = this.actualValue(ruleset);
+      var currentFit = this.actualValue(ruleset);
     var grad = possibleScores(this,ruleset);
     for(var j=0; j<grad.length; j++){
       grad[j] = grad[j]-currentFit; //the change in fit for each
     }
     return grad;
   },
-  changeValue: function(target){
-    if(this.pattern.length>0) {
-    this.desiredVal = target;
-      var oldRuleset = ruleset;
-      for(var i=0; i<9; i++){
-        var newRuleset = guessToRule(oldRuleset,this);
-        if(equal(newRuleset, oldRuleset)){
-          break;
-        }
-        oldRuleset = newRuleset;
-      }
-      if(!equal(ruleset,newRuleset)){
-        changeRule(newRuleset);
-      }
-    }
-  },
+    changeValue: function(target){
+	if(this.patterns.length>0) {
+	    this.desiredVal = target;
+	    var oldRuleset = ruleset;
+	    for(var i=0; i<9; i++){
+		var newRuleset = guessToRule(oldRuleset,this);
+		if(equal(newRuleset, oldRuleset)){
+		    break;
+		}
+		oldRuleset = newRuleset;
+	    }
+	    if(!equal(ruleset,newRuleset)){
+		changeRule(newRuleset);
+	    }
+	}
+    },
+    errorOf: function (ruleset){
+	if(this.desiredVal !== undefined){
+	    return Math.abs(this.actualValue(ruleset) - this.desiredVal);
+	}
+	return 0;
+    },
   showChange: function(place){
     var rules = copyVect(ruleset);
     var currentFit = this.actualValue(ruleset);
@@ -78,9 +78,40 @@ var sharedPrototype = {
       }
     }
   },
-  actualValue: function(ruleset){
-      return predict(ruleToPattern(ruleset),this.pattern);
-  }
+    actualValue: function(ruleset){
+	var length = this.patterns.length;
+	var rule = ruleToPattern(ruleset);
+	if(length == 0){
+	    return 0;
+	} else if(length == 1){
+	    return predict(rule,this.patterns[0]);
+	} else if(this.desiredVal !== undefined){
+	    var place = this.desiredVal*(length-1);
+	    if(place%1 == 0){//at the instant the desired value crosses over from one segment of the peicewise function to another, it averages the two segments
+		var low = this.patterns[clamp(0,place-1,length-1)];
+		var high = this.patterns[clamp(0,place+1,length-1)];
+		var diff = predict(rule,high)-predict(rule,low);
+		var value = (place + diff)/(length-1);
+		var result = clamp(0,value,1);
+		return result;
+	    } else { //returns the value appropriet for the segment of the peicewise function it is in
+		var low = this.patterns[Math.floor(place)];
+		var high = this.patterns[Math.ceil(place)];
+		var diff = (1 + predict(rule,high)-predict(rule,low))/2;
+		var result = (Math.floor(place)+diff)/(length-1);
+		return result;
+	    }
+	} else {
+	    var sum=0;
+	    var maxsum=0;
+	    for (var i=0; i<this.patterns.length; i++){
+		var weight = predict(rule,this.patterns[i]);
+		maxsum += weight;
+		sum += weight*i;
+	    }
+	    return sum/maxsum;
+	}
+    }
 };
 function createSlider(){
   var slider = document.createElement("div");
@@ -129,21 +160,24 @@ function mouseDownSlider(e){
   this.style.border = "2px solid black";
 }
 function mouseUpSliderGroup(e){
-  var box = e.target;
+    var box = e.target;
     if(grabbedCA !== null){
-      box.appendChild(grabbedCA);
-      grabbedCA.group = box;
-      //collect patterns
-      var list = [];
-      for(var t=0; t< box.childNodes.length; t++){
-	  var item = box.childNodes[t];
-	  var thumb = item.CA;
-	  list.push(thumb.pattern);
-      }
-	//hack; really I want the list of them
-      box.slider.pattern = grabbedCA.CA.pattern;
-      grabbedCA = null;
+	box.appendChild(grabbedCA);
+	grabbedCA.group = box;
+	//collect patterns
+	updatePatternList(box.childNodes,box.slider);
+	grabbedCA = null;
+	if(sliders[sliders.length-1] == box.slider){ //if there are no more empty sliders, add one
+	    createSlider();
+	}
   }
+}
+function updatePatternList(thumbnails,slider){
+    var list = [];
+    for(var t=0; t< thumbnails.length; t++){
+	list.push(thumbnails[t].CA.pattern);
+    }
+    slider.patterns = list;
 }
 function deleteTarget(e){
   var node = findChild(e.target.parentNode,"target");

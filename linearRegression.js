@@ -10,34 +10,28 @@ function guessToRule(ruleset,expr){
   var rule = copyVect(ruleset);
   var scores = leastChange(ruleset);
   var err = sumError(ruleset);
-  var thiserr = errorOf(expr,ruleset);
+  var thiserr = expr.errorOf(ruleset);
   if(err<=0.05){
     return ruleset;
   }
   var bestAt = randLeastAt(scores);
   rule[Math.floor(bestAt/states)] = bestAt%states;
-  if(scores[bestAt] < err || errorOf(expr,rule) < thiserr){
+  if(scores[bestAt] < err || expr.errorOf(rule) < thiserr){
     return rule;
   }
   return ruleset;
 }
-function errorOf(expr,ruleset){
-  if(expr.desiredVal !== undefined){
-    return Math.abs(expr.actualValue(ruleset) - expr.desiredVal);
-  }
-  return 0;
-}
 function sumError(ruleset){
   var error = 0;
   for(var i=0; i<sliders.length; i++){
-    error += errorOf(sliders[i], ruleset);
+    error += sliders[i].errorOf( ruleset);
   }
   return error;
 }
 function leastChange(ruleset){
   var changes = [];
   for(var i=0; i<sliders.length; i++){
-    if(sliders[i].desiredVal !== undefined && sliders[i].pattern.length > 0){
+    if(sliders[i].desiredVal !== undefined && sliders[i].patterns.length > 0){
       changes.push(goodness(sliders[i], ruleset, sliders[i].desiredVal));
     }
   }

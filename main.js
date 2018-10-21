@@ -253,7 +253,7 @@ function init(){
   }
   changeRule(newRule());
   for(var i=0; i<1; i++){
-    createSlider(i);
+      createSlider();
   }
   sliders.active=sliders[0];
 }

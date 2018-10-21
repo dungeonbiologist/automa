@@ -58,8 +58,7 @@ function mouseUpThumbnail(e){//when you click on a thumbnail it sets the current
 	} else {
 	    insertAfter(grabbedCA,thumb);
 	}
-	//hack; it the pattern should be the list of patterns
-	thumb.group.slider.pattern = grabbedCA.CA.pattern;
+	updatePatternList(thumb.group.childNodes,thumb.group.slider);
 	grabbedCA = null;
     }
     ;}
