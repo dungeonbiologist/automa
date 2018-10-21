@@ -30,34 +30,34 @@ function outlineRules(g){
     var styles = ["2px solid white", "2px solid green", "2px solid red", "2px solid yellow"];
     var style = [];
     for(var i=0; i<states*states; i++){
-	var more=0;
-	var less=0;
-	for(var j=0; j<states; j++){
-	    if(g[states*i+j] > 0){
-		more=2;
-	    } else if(g[states*i+j] < 0){
-		less=1;
-	    }
-	}
-	style[i]=more+less;
+   var more=0;
+   var less=0;
+   for(var j=0; j<states; j++){
+       if(g[states*i+j] > 0){
+      more=2;
+       } else if(g[states*i+j] < 0){
+      less=1;
+       }
+   }
+   style[i]=more+less;
     }
     var children = document.getElementById("rules").childNodes;
     for(var j=0; j<children.length; j++){
-	var rules = children[j].childNodes;
-	for(var i=0; i<rules.length; i++){
-	    var place = states*i + j;
-	    rules[i].style.border = styles[style[place]];
-	}
+   var rules = children[j].childNodes;
+   for(var i=0; i<rules.length; i++){
+       var place = states*i + j;
+       rules[i].style.border = styles[style[place]];
+   }
     }
 }
 
 function drawRules(ruleset){
     var children = document.getElementById("rules").childNodes;
     for(var j=0; j<children.length; j++){
-	var rules = children[j].childNodes;
-	for(var i=0; i<rules.length; i++){
-	    var rule = drawTriad(rules[i], [i, j, ruleset[states*i + j]], showRule == states*i+j );
-	}
+   var rules = children[j].childNodes;
+   for(var i=0; i<rules.length; i++){
+       var rule = drawTriad(rules[i], [i, j, ruleset[states*i + j]], showRule == states*i+j );
+   }
     }
 }
 
@@ -66,9 +66,9 @@ function mouseMoveTriad(e){
     var triad = e.target;
     var place = states*triad["data-left"] + triad["data-right"];
     if(ruleset[place] == triad["data-bottom"]){
-	showRule=place;for(var j=0; j<sliders.length; j++){
-	    sliders[j].showChange(place);
-	}
+   showRule=place;for(var j=0; j<sliders.length; j++){
+       sliders[j].showChange(place);
+   }
     }
     render();
 }

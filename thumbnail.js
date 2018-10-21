@@ -49,17 +49,17 @@ function createGroup(){
 function mouseUpThumbnail(e){//when you click on a thumbnail it sets the current rule to it
     var thumb = e.target;
     if(grabbedCA == null){
-	var data = thumb.CA;
-	changeRule(data.ruleset,true);
+   var data = thumb.CA;
+   changeRule(data.ruleset,true);
     } else {
-	grabbedCA.group = thumb.group;
-	if(mouseOf(thumb,e).x < thumb.width/2){
-	    thumb.parentNode.insertBefore(grabbedCA,thumb);
-	} else {
-	    insertAfter(grabbedCA,thumb);
-	}
-	updatePatternList(thumb.group.childNodes,thumb.group.slider);
-	grabbedCA = null;
+   grabbedCA.group = thumb.group;
+   if(mouseOf(thumb,e).x < thumb.width/2){
+       thumb.parentNode.insertBefore(grabbedCA,thumb);
+   } else {
+       insertAfter(grabbedCA,thumb);
+   }
+   updatePatternList(thumb.group.childNodes,thumb.group.slider);
+   grabbedCA = null;
     }
     ;}
 function mouseDownThumbnail(e){
@@ -70,66 +70,66 @@ function mouseDownThumbnail(e){
 function countsToVector(counts,ruleset){
     var vect = [];
     for (var i =0; i<states*states; i++){
-	for(var j=0; j<states; j++){
-	    vect[i*states+j]=0;
-	}
-	vect[i*states+ruleset[i]]=counts[i];
+   for(var j=0; j<states; j++){
+       vect[i*states+j]=0;
+   }
+   vect[i*states+ruleset[i]]=counts[i];
     }
     return vect;
 }
 function mouseDownOriginalThumbnail(e){
     grabbedCA = makeThumbnail(
-	canvases[states*states],
-	ruleset,
-	countsToVector(countRulesUsed,ruleset)
+   canvases[states*states],
+   ruleset,
+   countsToVector(countRulesUsed,ruleset)
     );
 }
 function mouseUpGroup(e){
     var box = e.target;
     if(grabbedCA !== null){
-	box.appendChild(grabbedCA);
-	grabbedCA=null;
-	var list = [];
-	for(var t=0; t< box.childNodes.length; t++){
-	    var thumb = box.childNodes[t].CA;
-	    list.push(thumb.pattern);
-	}
-	//redraw the group summary thumbnail
-	var pattern = minSharedPattern(list,20);
-	pattern = normPattern(pattern);
-	var data = box.group;
-	data.pattern=pattern;
-	var button = data.thumbnail;
-	var temprow = copyVect(row);
-	var semirule = patternToSemirule(pattern);
-	var rule = patternToRule(pattern,ruleset);
-	var ruleused=[];
-	fillout(temprow,rule,ruleused,[]);
-	var context = button.getContext("2d");
-	context.save();
-	context.clearRect(0,0,button.width,button.height);
-	context.scale(1/3,1/3);
-	semifillBody(context,temprow,ruleused,semirule);
-	context.restore();
-	context.save();
-	var px = states*size;
-	var ratio = 1/2;
-	context.translate(50-px*ratio,50-px*ratio);
-	context.scale(ratio, ratio);
-	drawPattern(context, pattern);
-	//draw box around rules
-	context.strokeStyle="#000000";
-	context.strokeRect(0,0,px,px);
-	context.restore();
+   box.appendChild(grabbedCA);
+   grabbedCA=null;
+   var list = [];
+   for(var t=0; t< box.childNodes.length; t++){
+       var thumb = box.childNodes[t].CA;
+       list.push(thumb.pattern);
+   }
+   //redraw the group summary thumbnail
+   var pattern = minSharedPattern(list,20);
+   pattern = normPattern(pattern);
+   var data = box.group;
+   data.pattern=pattern;
+   var button = data.thumbnail;
+   var temprow = copyVect(row);
+   var semirule = patternToSemirule(pattern);
+   var rule = patternToRule(pattern,ruleset);
+   var ruleused=[];
+   fillout(temprow,rule,ruleused,[]);
+   var context = button.getContext("2d");
+   context.save();
+   context.clearRect(0,0,button.width,button.height);
+   context.scale(1/3,1/3);
+   semifillBody(context,temprow,ruleused,semirule);
+   context.restore();
+   context.save();
+   var px = states*size;
+   var ratio = 1/2;
+   context.translate(50-px*ratio,50-px*ratio);
+   context.scale(ratio, ratio);
+   drawPattern(context, pattern);
+   //draw box around rules
+   context.strokeStyle="#000000";
+   context.strokeRect(0,0,px,px);
+   context.restore();
     }
 }
 function hideGroup(e){
     var button = e.target;
     var box = button.group.box;
     if (box.style.display === "none") {
-	box.style.display = "inline-block";
+   box.style.display = "inline-block";
     } else {
-	box.style.display = "none";
+   box.style.display = "none";
     }
 }
 function dblclickGroup(e){
